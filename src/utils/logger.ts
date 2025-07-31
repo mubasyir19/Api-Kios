@@ -13,7 +13,7 @@ export const logger = winston.createLogger({
   level: env.NODE_ENV === 'production' ? 'info' : 'debug',
   format: logFormat,
   defaultMeta: {
-    service: 'lapkeu-api',
+    service: 'kios-api',
   },
   transports: [
     new winston.transports.File({

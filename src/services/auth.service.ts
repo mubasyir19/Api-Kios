@@ -1,7 +1,14 @@
 import { PrismaClient } from '../../prisma/generated/prisma';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
 const prisma = new PrismaClient();
+
+type LoginData = {
+  identifier: string;
+  password: string;
+};
 
 interface RegisterData {
   fullname: string;
@@ -21,7 +28,44 @@ class AuthService {
     });
   }
 
-  async login() {}
+  async login(data: LoginData) {
+    const { identifier, password } = data;
+
+    if (!identifier) {
+      throw new Error('Email or username is required');
+    }
+
+    if (!password) {
+      throw new Error('Password is required');
+    }
+
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email: identifier }, { username: identifier }],
+      },
+    });
+    if (!existingUser) {
+      throw new Error('Account not found');
+    }
+
+    const checkPassword = await bcrypt.compare(data.password, existingUser.password);
+    if (!checkPassword) {
+      throw new Error('Invalid Password');
+    }
+
+    const user = {
+      id: existingUser.id,
+      fullname: existingUser.fullname,
+      email: existingUser.email,
+      username: existingUser.username,
+      phoneNumber: existingUser.phoneNumber,
+      role: existingUser.role,
+    };
+
+    const jwtToken = jwt.sign(user, env.JWT_SECRET as string);
+
+    return { user, jwtToken };
+  }
 
   async register(data: RegisterData) {
     const checkUser = await this.findByEmail(data.email);

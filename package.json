@@ -27,7 +27,7 @@
     "jsonwebtoken": "^9.0.2",
     "uuid": "^11.1.0",
     "winston": "^3.17.0",
-    "zod": "^3.25.67"
+    "zod": "^4.0.14"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
